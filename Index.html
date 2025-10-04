@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Golden Watch Shop - BDM Capstone Dashboard (Anaypal Singh)</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --bs-primary-rgb: 13, 110, 253;
+      --bs-secondary-rgb: 108, 117, 125;
+      --custom-palette-blue: #0d6efd;
+      --custom-palette-teal: #20c997;
+      --custom-palette-orange: #fd7e14;
+      --custom-palette-red: #dc3545;
+      --custom-palette-green: #198754;
+      --custom-palette-gray: #6c757d;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fc;
+      color: #343a40;
+    }
+    .highlight {
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #0056b3;
+    }
+    .tag {
+        display: inline-block;
+        padding: 0.25em 0.6em;
+        font-size: 0.85em;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.375rem;
+    }
+    .header-card {
+      background: linear-gradient(135deg, #0a58ca 0%, #0d6efd 100%);
+    }
+    .card {
+      border: none;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.07);
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      height: 100%;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 1rem 1.5rem;
+    }
+    .card-body {
+      padding: 1.5rem;
+    }
+    .card-accent-left {
+      border-left: 5px solid var(--custom-palette-blue);
+    }
+    .store-image-container {
+      position: relative;
+      height: 20rem;
+      background-color: #e9ecef;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    /* === CORRECTED CSS FOR IMAGE GALLERY === */
+    .store-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Scale image to fit inside, preserving aspect ratio */
+        object-position: center; /* Ensure it's centered */
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .store-image.active { 
+      opacity: 1; 
+    }
+    
+    .insights-list ul { list-style: none; padding-left: 0; }
+    .insights-list li { padding-left: 1.5rem; position: relative; margin-bottom: 0.5rem; }
+    .insights-list li::before {
+      content: '▸';
+      color: var(--custom-palette-blue);
+      position: absolute; left: 0;
+      font-weight: bold;
+    }
+
+    .data-overview-list ul { list-style: none; padding-left: 0; }
+    .data-overview-list li {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    .data-overview-list li::before {
+      content: '▸';
+      color: var(--custom-palette-blue);
+      font-weight: bold;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    .chart-container {
+      width: 100%;
+      position: relative;
+      min-height: 300px;
+      flex-grow: 1;
+    }
+    .analysis-box {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        height: 100%;
+        border-top: 4px solid var(--custom-palette-blue);
+        transition: box-shadow 0.2s ease-in-out;
+    }
+    .analysis-box:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .analysis-icon {
+        font-size: 2rem;
+        color: var(--custom-palette-blue);
+        margin-bottom: 1rem;
+    }
+    .social-link {
+      text-decoration: none;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .social-link:hover { color: #dee2e6 !important; }
+    .nav-tabs .nav-link { border-width: 0 0 2px 0; font-weight: 500; color: #6c757d; }
+    .nav-tabs .nav-link.active { border-color: var(--custom-palette-blue); color: var(--custom-palette-blue); }
+  </style>
+</head>
+<body>
+
+  <div class="container-xxl py-4 py-lg-5">
+    <div class="row g-4 g-lg-5">
+
+      <div class="col-12">
+        <div class="card text-white text-center shadow-lg header-card">
+          <div class="card-body p-4 p-md-5">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/69/IIT_Madras_Logo.svg/1200px-IIT_Madras_Logo.svg.png" alt="IIT Madras Logo" class="mb-4" style="height: 5rem;">
+            <h1 class="card-title display-5 fw-bold mb-3">Strategic Insights for Timepiece Retail</h1>
+            <p class="card-subtitle h3 fw-light mb-4">New Golden Watch Shop - BDM Capstone Project</p>
+            <div class="bg-dark bg-opacity-25 px-3 py-2 rounded d-inline-block fs-6">
+              <p class="mb-2"><strong class="fw-semibold">Anaypal Singh</strong> | Roll No: <strong class="fw-semibold">23F3000736</strong></p>
+              <div class="d-flex justify-content-center align-items-center gap-4">
+                <a href="https://www.linkedin.com/in/anay-singh-6a21402a8" target="_blank" rel="noopener noreferrer" class="text-white social-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-linkedin me-2" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z"/></svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/anay-repo" target="_blank" rel="noopener noreferrer" class="text-white social-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-github me-2" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+                  <span>GitHub</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card card-accent-left">
+          <div class="card-header"><h2 class="h4 mb-0 text-primary fw-semibold">About New Golden Watch Shop</h2></div>
+          <div class="card-body">
+
+            <div class="store-image-container mb-4">
+               <img src="https://i.ibb.co/21P41n8F/IMG-20250608-144542.jpg" alt="Store Front" class="store-image active" id="storeImage1">
+               <img src="https://i.ibb.co/8DchqzF6/IMG-20250608-145314.jpg" alt="Store Interior" class="store-image" id="storeImage2">
+               <img src="https://i.ibb.co/Df2j3gyn/Authorization-Letter-1.jpg" alt="Authorization Letter" class="store-image" id="storeImage3">
+            </div>
+
+            <div class="text-center mb-4">
+              <button onclick="changeStoreImage(-1)" class="btn btn-outline-primary btn-sm me-2">Previous</button>
+              <button onclick="changeStoreImage(1)" class="btn btn-primary btn-sm">Next</button>
+            </div>
+            <div class="insights-list">
+              <h3 class="h5 fw-semibold text-dark mb-3">Store Overview:</h3>
+              <ul class="text-muted">
+                <li><strong>Type:</strong> Family-run B2C watch & clock retail shop</li>
+                <li><strong>Location:</strong> Railway Road, Rewari, Haryana</li>
+                <li><strong>Established:</strong> 1957</li>
+                <li><strong>Products:</strong> Wrist watches & wall clocks (<strong>Titan, Ajanta, Sonata,</strong> etc.)</li>
+                <li><strong>Operations:</strong> 9 AM - 9 PM (Mon–Sat)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+       <div class="card card-accent-left">
+         <div class="card-header"><h2 class="h4 mb-0 text-primary fw-semibold">Problem Statement & Objectives</h2></div>
+         <div class="card-body insights-list">
+           <h3 class="h5 fw-semibold text-dark mb-3">Key Challenges Identified:</h3>
+           <ul class="text-muted mb-4">
+             <li><span class="tag bg-danger-subtle text-danger-emphasis">Dead Stock Accumulation</span>: Premium brands are accumulating unsold inventory, tying up capital and space.</li>
+             <li><span class="tag bg-warning-subtle text-warning-emphasis">Profit Stagnation</span>: Average weekly profit is stagnant around <span class="highlight">₹20,777</span>, limiting growth.</li>
+             <li><span class="tag bg-secondary-subtle text-secondary-emphasis">Manual Record-Keeping</span>: Data is recorded in a Khata Book, preventing systematic analysis.</li>
+           </ul>
+           <h3 class="h5 fw-semibold text-dark mt-4 mb-3">Project Goal:</h3>
+            <p class="text-muted">Analyze sales data from <strong class="text-dark">Feb–Mar 2025</strong> to provide actionable recommendations to <strong class="text-success">reduce dead stock by 40-50%</strong> and <strong class="text-success">improve weekly profits by 20-25%.</strong></p>
+         </div>
+       </div>
+      </div>
+
+      <div class="col-12">
+       <div class="card card-accent-left">
+         <div class="card-header"><h2 class="h4 mb-0 text-primary fw-semibold">Data Overview & Collection</h2></div>
+         <div class="card-body">
+           <div class="row g-4">
+             <div class="col-lg-4 col-md-6">
+               <div class="p-3 bg-light border rounded h-100 data-overview-list">
+                 <h3 class="h5 fw-semibold text-dark mb-3">Source & Scope</h3>
+                 <ul class="text-muted small">
+                   <li><strong>Type:</strong> Primary Data</li>
+                   <li><strong>Source:</strong> New Golden Watch Shop (Khata Book & Notepad)</li>
+                   <li><strong>Collection:</strong> Record Digitization, Interviews</li>
+                   <li><strong>Period:</strong> Feb 3, 2025 - Mar 31, 2025 (8 weeks)</li>
+                 </ul>
+               </div>
+             </div>
+             <div class="col-lg-4 col-md-6">
+               <div class="p-3 bg-light border rounded h-100 data-overview-list">
+                 <h3 class="h5 fw-semibold text-dark mb-3">Dataset Details</h3>
+                 <ul class="text-muted small">
+                   <li><strong>Format:</strong> Cleaned, aggregated (Excel/Sheets)</li>
+                   <li><strong>Records:</strong> Approx. 60 days of sales & inventory data</li>
+                   <li><a href="https://drive.google.com/drive/folders/1JwCZb3Zhj1A8WCN4PgiNLCbpjVVlS9Y0?usp=sharing" target="_blank">Sales Dataset (opens new tab)</a></li>
+                   <li><a href="https://drive.google.com/drive/folders/1JwCZb3Zhj1A8WCN4PgiNLCbpjVVlS9Y0?usp=sharing" target="_blank">Inventory Dataset (opens new tab)</a></li>
+                 </ul>
+               </div>
+             </div>
+             <div class="col-lg-4 col-md-12">
+               <div class="p-3 bg-light border rounded h-100 data-overview-list">
+                 <h3 class="h5 fw-semibold text-dark mb-3">Categories</h3>
+                 <ul class="text-muted small">
+                   <li><span class="tag bg-primary-subtle text-primary-emphasis">Wrist Watches</span>: Titan, Sonata, Zoop, Fastrack, Tommy Hilfiger, Police, Kenneth Cole</li>
+                   <li><span class="tag bg-info-subtle text-info-emphasis">Wall Clocks</span>: Ajanta, Timex, Maxima, Rikon, Casio, Victoria London, Citizen</li>
+                 </ul>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+      </div>
+
+      <div class="col-12">
+       <div class="card">
+         <div class="card-header bg-light"><h2 class="h4 mb-0 text-primary fw-semibold">Analytical Approach</h2></div>
+         <div class="card-body">
+           <div class="row g-4">
+             <div class="col-lg col-md-6">
+               <div class="analysis-box text-center">
+                   <div class="analysis-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1zm-1 12H6v-7a2 2 0 0 0-2-2H2v7h2zm4 0H10v-2a2 2 0 0 0-2-2H6v-2a2 2 0 0 0-2-2H2v-2a2 2 0 0 0-2-2v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v1H.5a.5.5 0 0 0 0 1H1v3a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V7a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2v2a2 2 0 0 0 2 2h2v2h.5a.5.5 0 0 0 0-1H15V2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1z"/></svg></div>
+                   <h3 class="h5 fw-semibold mb-2">Descriptive Stats</h3><p class="text-muted small">Calculated totals and averages to identify top sellers like <strong>Titan & Ajanta</strong>.</p>
+               </div>
+             </div>
+             <div class="col-lg col-md-6">
+               <div class="analysis-box text-center">
+                   <div class="analysis-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-graph-up-arrow" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/></svg></div>
+                   <h3 class="h5 fw-semibold mb-2">Trend Analysis</h3><p class="text-muted small">Revealed that <strong>Mondays & Fridays</strong> are peak sales days.</p>
+               </div>
+             </div>
+             <div class="col-lg col-md-6">
+               <div class="analysis-box text-center">
+                   <div class="analysis-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-pie-chart-fill" viewBox="0 0 16 16"><path d="M15.985 8.5H8.207l.055 1.995A7.002 7.002 0 0 1 8 15a7 7 0 1 1 7.985-6.5"/></svg></div>
+                   <h3 class="h5 fw-semibold mb-2">ABC Segmentation</h3><p class="text-muted small">Classified inventory into <strong>A (High-Value)</strong>, B, and <strong>C (Low-Value)</strong> categories.</p>
+               </div>
+             </div>
+             <div class="col-lg col-md-6">
+               <div class="analysis-box text-center">
+                   <div class="analysis-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-box-seam-fill" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.995 1.144A1.5 1.5 0 0 1 6.27 0h3.46a1.5 1.5 0 0 1 1.275 1.144L12.02 2.5H14.5a1.5 1.5 0 0 1 1.5 1.5v1.055a.5.5 0 0 1-.468.5H1.468a.5.5 0 0 1-.468-.5V4a1.5 1.5 0 0 1 1.5-1.5h2.48L4.995 1.144zM1 6.525A1.5 1.5 0 0 1 2.5 5h11A1.5 1.5 0 0 1 15 6.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5zM8 7.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5H11a.5.5 0 0 0 0-1H8.5V8a.5.5 0 0 0-.5-.5"/></svg></div>
+                   <h3 class="h5 fw-semibold mb-2">Dead Stock Analysis</h3><p class="text-muted small">Tracked unsold items to flag slow movers like <strong>Tommy Hilfiger</strong>.</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+      </div>
+
+      <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-light"><h2 class="h4 mb-0 text-primary fw-semibold">Results & Key Findings</h2></div>
+            <div class="card-body">
+              <div class="row g-4">
+
+                  <div class="col-lg-6">
+                    <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">Total Units Sold: Wrist Watches</h4>
+                           <p class="text-center text-muted small mb-2">(Feb–Mar 2025)</p>
+                           <div class="chart-container"><canvas id="totalWatchSalesChart"></canvas></div>
+                           <p class="text-muted small mt-2"><strong>Key Insight:</strong> <span class="tag bg-success-subtle text-success-emphasis">Titan (135 units)</span>, <span class="tag bg-primary-subtle text-primary-emphasis">Sonata (89)</span>, and <span class="tag bg-primary-subtle text-primary-emphasis">Zoop (86)</span> are the clear market leaders. In contrast, premium brands like <span class="tag bg-danger-subtle text-danger-emphasis">Tommy Hilfiger (10)</span> sell in very low volumes.</p>
+                       </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">Total Units Sold: Wall Clocks</h4>
+                           <p class="text-center text-muted small mb-2">(Feb–Mar 2025)</p>
+                           <div class="chart-container"><canvas id="totalClockSalesChart"></canvas></div>
+                           <p class="text-muted small mt-2"><strong>Key Insight:</strong> <span class="tag bg-success-subtle text-success-emphasis">Ajanta (116 units)</span> is the dominant brand, nearly doubling the sales of the next competitor. <span class="tag bg-danger-subtle text-danger-emphasis">Citizen (29)</span> is a significant underperformer.</p>
+                       </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">Daily Sales Performance</h4>
+                           <p class="text-center text-muted small mb-2">(Aggregated Units Sold by Day)</p>
+                           <div class="chart-container"><canvas id="dailySalesChart"></canvas></div>
+                           <p class="text-muted small mt-2"><strong>Key Insight:</strong> Sales consistently peak at the start and end of the week, with <strong>Monday and Friday</strong> being the most productive days, presenting an opportunity for targeted promotions.</p>
+                       </div>
+                     </div>
+                  </div>
+
+                   <div class="col-lg-6">
+                     <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">Dead Stock Inventory Trend</h4>
+                           <p class="text-center text-muted small mb-2">(Unsold Units Over Time)</p>
+                           <div class="chart-container"><canvas id="deadStockChart"></canvas></div>
+                           <p class="text-muted small mt-2"><strong>Key Insight:</strong> The inventory for <strong class="text-danger">Tommy Hilfiger</strong> and <strong class="text-danger">Citizen</strong> steadily increases, confirming they are becoming dead stock. In contrast, the inventory of a fast-mover like <strong>Titan</strong> is effectively managed.</p>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div class="col-lg-6">
+                     <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">Weekly Profit Trend</h4>
+                           <p class="text-center text-muted small mb-2">(Feb–Mar 2025)</p>
+                           <div class="chart-container"><canvas id="profitChart"></canvas></div>
+                           <p class="text-muted small mt-2"><strong>Key Insight:</strong> The weekly profit is largely stable but stagnant, fluctuating around a mean of <span class="highlight">₹20,777</span>. This indicates a lack of growth, which targeted strategies can address.</p>
+                       </div>
+                     </div>
+                   </div>
+
+                  <div class="col-lg-6">
+                    <div class="card">
+                       <div class="card-body d-flex flex-column">
+                           <h4 class="h5 fw-semibold text-center text-dark">ABC Analysis (Inventory Impact)</h4>
+                           <p class="text-center text-muted small mb-2">(Classification by Revenue Contribution)</p>
+                           <div class="chart-container"><canvas id="abcChart"></canvas></div>
+                            <p class="text-muted small mt-2"><strong>Key Insight:</strong> <strong>Category A</strong> items generate most revenue and require priority restocking. <strong>Category C</strong> items contribute little but hold significant stock value, making them prime candidates for clearance.</p>
+                       </div>
+                    </div>
+                  </div>
+
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <div class="col-12">
+       <div class="card card-accent-left">
+         <div class="card-header bg-light"><h2 class="h4 mb-0 text-primary fw-semibold">Actionable Recommendations</h2></div>
+         <div class="card-body">
+           <ul class="nav nav-tabs nav-fill mb-4" role="tablist">
+             <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#recInv-pane" type="button">Inventory & Stock</button></li>
+             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#recGrowth-pane" type="button">Sales & Growth</button></li>
+             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#recImpact-pane" type="button">Projected Impact</button></li>
+           </ul>
+           <div class="tab-content p-2">
+             <div class="tab-pane fade show active" id="recInv-pane">
+               <h3 class="h5 fw-semibold text-dark mb-3">To Reduce Dead Stock and Optimize Capital:</h3>
+               <div class="table-responsive"><table class="table table-striped table-hover small align-middle">
+                   <thead class="table-light"><tr><th>Recommendation</th><th>Rationale & Action</th><th>Priority</th></tr></thead>
+                   <tbody>
+                       <tr><td><strong>Adopt Data-Driven Restocking</strong></td><td>Reduce orders for Category C items (<strong class="text-danger">Tommy Hilfiger, Citizen</strong>). Re-allocate budget to Category A (<strong class="text-success">Titan, Ajanta</strong>).</td><td><span class="tag bg-danger-subtle text-danger-emphasis">High</span></td></tr>
+                       <tr><td><strong>Run Clearance Sales</strong></td><td>Offer a <span class="highlight">20-30% discount</span> on aged C-Category stock to liquidate inventory and improve cash flow immediately.</td><td><span class="tag bg-danger-subtle text-danger-emphasis">High</span></td></tr>
+                       <tr><td><strong>Create Bundle Offers</strong></td><td>Pair slow-movers with best-sellers (e.g., "Buy a Titan watch, get ₹500 off a Tommy Hilfiger"). This clears stock while protecting margins.</td><td><span class="tag bg-warning-subtle text-warning-emphasis">Medium</span></td></tr>
+                       <tr><td><strong>Enhance Store Layout</strong></td><td>Move top-sellers to the front. Create a dedicated clearance section.</td><td><span class="tag bg-warning-subtle text-warning-emphasis">Medium</span></td></tr>
+                   </tbody>
+                 </table></div></div>
+             <div class="tab-pane fade" id="recGrowth-pane">
+               <h3 class="h5 fw-semibold text-dark mb-3">To Break Profit Stagnation:</h3>
+               <div class="table-responsive"><table class="table table-striped table-hover small align-middle">
+                  <thead class="table-light"><tr><th>Recommendation</th><th>Rationale & Action</th><th>Priority</th></tr></thead>
+                  <tbody>
+                      <tr><td><strong>Target Peak Sales Days</strong></td><td>Introduce special promotions or "Deal of the Day" offers on <strong class="text-dark">Mondays and Fridays</strong> to capitalize on high footfall.</td><td><span class="tag bg-danger-subtle text-danger-emphasis">High</span></td></tr>
+                      <tr><td><strong>Digitize Sales Records</strong></td><td>Transition from the Khata Book to Google Sheets for easy, ongoing analysis and forecasting.</td><td><span class="tag bg-danger-subtle text-danger-emphasis">High</span></td></tr>
+                      <tr><td><strong>Expand Online</strong></td><td>Partner with platforms like Amazon or Flipkart to reach a wider audience for premium, slow-moving brands.</td><td><span class="tag bg-warning-subtle text-warning-emphasis">Medium</span></td></tr>
+                  </tbody>
+                 </table></div></div>
+             <div class="tab-pane fade" id="recImpact-pane">
+               <h3 class="h5 fw-semibold text-dark mb-4">Projected Benefits of Implementation:</h3>
+               <div class="row g-4">
+                 <div class="col-md-4"><div class="card bg-success-subtle border-success-subtle"><div class="card-body"><h4 class="h5 fw-semibold text-success-emphasis mb-3">Financial</h4><ul class="list-unstyled text-muted small ps-3"><li>▸ <strong class="text-dark">Profit Increase:</strong> Potential uplift of <span class="highlight">20-25%</span> weekly.</li><li>▸ <strong class="text-dark">Dead Stock Reduction:</strong> Decrease by <span class="highlight">40-50%</span>.</li><li>▸ <strong class="text-dark">Capital Freed:</strong> Unlock <span class="highlight">₹20k–₹30k</span>.</li></ul></div></div></div>
+                 <div class="col-md-4"><div class="card bg-info-subtle border-info-subtle"><div class="card-body"><h4 class="h5 fw-semibold text-info-emphasis mb-3">Operational</h4><ul class="list-unstyled text-muted small ps-3"><li>▸ <strong class="text-dark">Inventory Turnover:</strong> Increased efficiency & cash conversion.</li><li>▸ <strong class="text-dark">Decision Making:</strong> Shift to data-driven purchasing.</li><li>▸ <strong class="text-dark">Space Optimization:</strong> Better use of shelf space.</li></ul></div></div></div>
+                 <div class="col-md-4"><div class="card bg-warning-subtle border-warning-subtle"><div class="card-body"><h4 class="h5 fw-semibold text-warning-emphasis mb-3">Strategic</h4><ul class="list-unstyled text-muted small ps-3"><li>▸ <strong class="text-dark">Market Competitiveness:</strong> Increased responsiveness to demand.</li><li>▸ <strong class="text-dark">Sustainable Growth:</strong> Foundation for long-term health.</li><li>▸ <strong class="text-dark">Scalability:</strong> Digital records enable future expansion.</li></ul></div></div></div>
+               </div></div>
+           </div>
+         </div>
+       </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <script>
+    let currentStoreImage = 1;
+    const totalStoreImages = 3; // Updated to 3 to match the number of images
+    function changeStoreImage(direction) {
+      document.getElementById(`storeImage${currentStoreImage}`).classList.remove('active');
+      currentStoreImage += direction;
+      if (currentStoreImage > totalStoreImages) currentStoreImage = 1;
+      if (currentStoreImage < 1) currentStoreImage = totalStoreImages;
+      document.getElementById(`storeImage${currentStoreImage}`).classList.add('active');
+    }
+
+    function createChart(id, type, data, options) {
+      const ctx = document.getElementById(id)?.getContext('2d');
+       if (!ctx) return null;
+      const defaultOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }, boxWidth: 15, padding: 15, color: '#495057' }}, tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.8)', titleFont: { size: 14 }, bodyFont: { size: 12 }, padding: 12 }},
+        scales: { x: { ticks: { font: { size: 11 }, color: '#6c757d' }, grid: { display: false } }, y: { beginAtZero: true, ticks: { font: { size: 11 }, color: '#6c757d' }, grid: { color: 'rgba(0,0,0,0.05)' } }},
+        animation: { duration: 800 },
+      };
+      const mergedOptions = { ...defaultOptions, ...options, plugins: { ...defaultOptions.plugins, ...options?.plugins }, scales: { x: {...defaultOptions.scales.x, ...options?.scales?.x}, y: {...defaultOptions.scales.y, ...options?.scales?.y}}};
+      return new Chart(ctx, { type: type, data: data, options: mergedOptions });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const chartColors = { blue: '#0d6efd', teal: '#20c997', orange: '#fd7e14', red: '#dc3545', green: '#198754', gray: '#6c757d', lightBlue: '#0dcaf0' };
+        const chartColorsTransparent = { blue: 'rgba(13, 110, 253, 0.2)', green: 'rgba(25, 135, 84, 0.2)', teal: 'rgba(32, 201, 151, 0.2)' };
+
+        const totalWatchSalesLabels = ['Titan', 'Sonata', 'Zoop', 'Fastrack', 'Police', 'K. Cole', 'T. Hilfiger'];
+        const totalWatchSalesData = [135, 89, 86, 61, 21, 18, 10];
+
+        const totalClockSalesLabels = ['Ajanta', 'Timex', 'Maxima', 'Rikon', 'Casio', 'V. London', 'Citizen'];
+        const totalClockSalesData = [116, 69, 57, 50, 47, 30, 29];
+        
+        const abcLabels = ['Category A: High-Value', 'Category B: Moderate', 'Category C: Low-Value'];
+        const abcData = [75, 15, 10];
+
+        const dailySalesLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dailyWatchData = [92, 58, 65, 63, 88, 53];
+        const dailyClockData = [85, 59, 64, 58, 75, 56];
+        
+        const stockTrendLabels = ['Feb 2', 'Feb 16', 'Mar 2', 'Mar 16'];
+        const tommyHilfigerStock = [15, 25, 37, 48];
+        const citizenStock = [10, 14, 27, 30];
+        const titanStock = [6, 10, 5, 4];
+
+        const profitLabels = ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6', 'Wk 7', 'Wk 8'];
+        const profitData = [20700, 21500, 20300, 17500, 19200, 22400, 19500, 25500];
+
+        createChart('totalWatchSalesChart', 'bar', {
+            labels: totalWatchSalesLabels,
+            datasets: [{ label: 'Units Sold', data: totalWatchSalesData, backgroundColor: chartColors.blue, borderRadius: 4 }]
+        }, { plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, minRotation: 30 } } } });
+
+        createChart('totalClockSalesChart', 'bar', {
+            labels: totalClockSalesLabels,
+            datasets: [{ label: 'Units Sold', data: totalClockSalesData, backgroundColor: chartColors.lightBlue, borderRadius: 4 }]
+        }, { plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, minRotation: 30 } } } });
+        
+        createChart('abcChart', 'doughnut', {
+            labels: abcLabels,
+            datasets: [{ data: abcData, backgroundColor: [chartColors.green, chartColors.orange, chartColors.red], borderWidth: 3 }]
+        }, { plugins: { legend: { position: 'right' } } });
+
+        createChart('dailySalesChart', 'line', {
+            labels: dailySalesLabels,
+            datasets: [
+                { label: 'Wrist Watches', data: dailyWatchData, borderColor: chartColors.blue, backgroundColor: chartColorsTransparent.blue, fill: true, tension: 0.4, pointBackgroundColor: chartColors.blue, pointRadius: 4 },
+                { label: 'Wall Clocks', data: dailyClockData, borderColor: chartColors.teal, backgroundColor: chartColorsTransparent.teal, fill: true, tension: 0.4, pointBackgroundColor: chartColors.teal, pointRadius: 4 }
+            ]
+        }, { plugins: { legend: { position: 'top' } } });
+
+        createChart('deadStockChart', 'line', {
+            labels: stockTrendLabels,
+            datasets: [
+                { label: 'Tommy Hilfiger (Dead Stock)', data: tommyHilfigerStock, borderColor: chartColors.red, tension: 0.2, pointBackgroundColor: chartColors.red, pointRadius: 4 },
+                { label: 'Citizen (Dead Stock)', data: citizenStock, borderColor: chartColors.orange, tension: 0.2, pointBackgroundColor: chartColors.orange, pointRadius: 4 },
+                { label: 'Titan (Fast Mover)', data: titanStock, borderColor: chartColors.green, tension: 0.2, borderDash: [5, 5], pointBackgroundColor: chartColors.green, pointRadius: 4 }
+            ]
+        }, { plugins: { legend: { position: 'top' } } });
+        
+        createChart('profitChart', 'line', {
+            labels: profitLabels,
+            datasets: [{ label: 'Weekly Profit (₹)', data: profitData, borderColor: chartColors.green, backgroundColor: chartColorsTransparent.green, fill: true, tension: 0.4, pointBackgroundColor: chartColors.green, pointRadius: 4 }]
+        }, { plugins: { legend: { display: false } } });
+    });
+  </script>
+
+</body>
+</html>
