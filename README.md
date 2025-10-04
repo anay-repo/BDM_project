@@ -8,7 +8,7 @@
 | Item | Link |
 | :--- | :--- |
 | **Project Website** 🌐 | **https://anay-repo.github.io/BDM_project/** |
-| **Viva PPT Slides** 📄 | **https://tinyurl.com/ycydznfr** |
+| **Viva PPT Slides** 📄 | **https://tinyurl.com/56uz676v** |
 
 ---
 
